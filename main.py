@@ -1,11 +1,11 @@
-import telebot
-from telebot import types
+from telebot.async_telebot import AsyncTeleBot, types
+import asyncio
 import random
 from files import anekdot_list
 
 
 TOKEN = ''
-bot = telebot.TeleBot(TOKEN)
+bot = AsyncTeleBot(TOKEN)
 
 
 def get_random_anekdot():
@@ -16,7 +16,7 @@ def get_random_anekdot():
 
 
 @bot.message_handler(commands=['start'])
-def start(message):
+async def start(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     btn1 = types.KeyboardButton('Хочу анекдот!')
     btn2 = types.KeyboardButton('id')
@@ -27,32 +27,33 @@ def start(message):
           '\n- каждый раз новый анекдот :)' \
           '\n- узнаешь свой id в телеге' \
           '\n- научишься пилить такие же боты сам'
-    bot.send_message(message.chat.id, msg, parse_mode='html', reply_markup=markup)
+    await bot.send_message(message.chat.id, msg, parse_mode='html', reply_markup=markup)
 
 
 @bot.message_handler()
-def get_user_text(message):
+async def get_user_text(message):
     greeting_list = ['И тебе саламчик от братвы, кореш!', 'И тебе не хворать!', 'Здрасьте, милсдарь!', 'Хеллоу, ёпта!']
     random_greeting = random.choice(greeting_list)
     if message.text.lower() == "привет":
-        bot.send_message(message.chat.id, random_greeting, parse_mode='html')
+        await bot.send_message(message.chat.id, random_greeting, parse_mode='html')
     elif message.text.lower() == "id":
-        bot.send_message(message.chat.id, f"Твой ID: {message.from_user.id}", parse_mode='html')
+        await bot.send_message(message.chat.id, f"Твой ID: {message.from_user.id}", parse_mode='html')
     elif message.text.lower() == "не, ну не бот, а дерьмо!":
         photo = open('kakashka.jpg', 'rb')
-        bot.send_photo(message.chat.id, photo)
+        await bot.send_photo(message.chat.id, photo)
         audio = open('haha_chertila.mp3', 'rb')
-        bot.send_audio(message.chat.id, audio)
+        await bot.send_audio(message.chat.id, audio)
     elif message.text.lower() == "научи меня пилить тг-боты!":
-        bot.send_message(message.chat.id, "Лови ссылочку - https://www.youtube.com/watch?v=HodO2eBEz_8", parse_mode='html')
+        await bot.send_message(message.chat.id, "Лови ссылочку - https://www.youtube.com/watch?v=HodO2eBEz_8", parse_mode='html')
     elif message.text.lower() == "хочу анекдот!":
         audio = get_random_anekdot()
-        bot.send_audio(message.chat.id, audio)
+        await bot.send_audio(message.chat.id, audio)
     else:
-        bot.send_message(message.chat.id, "Шоооо? Не врубаюсь, о чем ты, бро(", parse_mode='html')
+        await bot.send_message(message.chat.id, "Шоооо? Не врубаюсь, о чем ты, бро(", parse_mode='html')
 
 
-bot.polling(none_stop=True)
+async def run():
+    await bot.polling(none_stop=True)
 
-
+asyncio.run(run())
 
